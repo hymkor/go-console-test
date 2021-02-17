@@ -56,6 +56,18 @@ func read(events []InputRecord) uint32 {
 	return n
 }
 
+var shiftBit = map[uint32]string{
+	0x0001:"RIGHT_ALT_PRESSED",
+	0x0002:"LEFT_ALT_PRESSED",
+	0x0004:"RIGHT_CTRL_PRESSED",
+	0x0008:"LEFT_CTRL_PRESSED",
+	0x0010:"SHIFT_PRESSED",
+	0x0020:"NUMLOCK_ON",
+	0x0040:"SCROLLLOCK_ON",
+	0x0080:"CAPSLOCK_ON",
+	0x0100:"ENHANCED_KEY",
+}
+
 func main() {
 	fmt.Println("Hit ESCAPE key to stop.")
 	for {
@@ -68,7 +80,17 @@ func main() {
 			switch e.EventType {
 			case KEY_EVENT:
 				ee := (*KeyEventRecord)(unsafe.Pointer(&e.Info[0]))
-				fmt.Printf("KeyEventRecord: %+v\n", ee)
+				fmt.Printf("KeyDown:%d", ee.KeyDown)
+				fmt.Printf(" UnicodeChar:%[1]d(0x%[1]X)", ee.UnicodeChar)
+				fmt.Printf(" VirtualKeyCode:%[1]d(0x%[1]X)", ee.VirtualKeyCode)
+				fmt.Printf(" VirtualScanCode:%[1]d(0x%[1]X)", ee.VirtualScanCode)
+				fmt.Printf(" ControlKeyState:%[1]d(0b%[1]b)", ee.ControlKeyState)
+				for bit,name := range shiftBit {
+					if ee.ControlKeyState & bit != 0 {
+						fmt.Printf(" %s",name)
+					}
+				}
+				fmt.Println()
 				if ee.UnicodeChar == 27 {
 					return
 				}
